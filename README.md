@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+#  AI Landing Page Builder 
 
-## Getting Started
+An agent-native, full-stack visual landing page generator built with Next.js, TypeScript, Tailwind CSS, `@google/genai` (Gemini SDK), and Zod schema validation. Users can describe their vision in natural language, and the AI streams back structured JSON blocks rendered instantly into an interactive, sortable canvas.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Tech Stack
+
+* **Framework:** Next.js (App Router) & React
+* **Styling & UI:** Tailwind CSS, Lucide Icons, Shadcn-inspired primitives
+* **AI Engine:** Google Gemini (`@google/genai`) using Structured Output Mode (`responseSchema`) & discriminated unions
+* **Validation:** Zod for runtime schema safety and UI boundary enforcement
+* **State Management:** Zustand with built-in history tracking (Undo/Redo) & custom selectors
+* **Drag-and-Drop:** `@dnd-kit` (sortable containers and dynamic layout physics)
+
+---
+
+## Core Architecture
+
+```text
+landing-page-builder/
+├── core/
+│   ├── gemini/           # Gemini API client wrapper & system prompts
+│   └── schemas/          # Zod runtime validation schemas (discriminated unions)
+├── features/
+│   └── canvas/           # Canvas store (Zustand), drag-and-drop hooks & components
+├── components/
+│   └── registry/         # Visual component registry (Hero, Features, Pricing, CTA, Footer)
+└── shared/
+    └── types/            # Global TypeScript interfaces and block definitions
+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Quick Start & Installation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Clone the repository:**
+```bash
+git clone https://github.com/Devcarlj/ai-landing-page-builder.git
+cd landing-page-builder
 
-## Learn More
+```
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Install dependencies:**
+```bash
+npm install
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. **Set up your environment variables:**
+Create a `.env.local` file in the root directory and add your Google Gemini API key:
+```env
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+
+
+4. **Run the development server:**
+```bash
+npm run dev
+
+```
+
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to start building!
+
+---
+
+## Key Engineering Highlights
+
+* **Discriminated Union Schema Validation:** Guarantees zero data mismatch between AI-generated payloads and React visual components.
+* **Granular Zustand Selectors:** Optimizes re-render performance across state changes and drag-and-drop operations.
+* **Robust Error Guardrails:** Enforces character limits and strict payload rules through Zod parsing before rendering items to the DOM.
+
+---
+
+##  License
+
+Distributed under the MIT License. See **[`LICENSE.`](./LICENSE)** for more information.
