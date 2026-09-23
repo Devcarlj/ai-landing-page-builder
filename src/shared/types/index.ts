@@ -71,10 +71,12 @@ export type BlockPropsMap = {
   footer: FooterProps;
 };
 
-export interface CanvasBlock<T extends BlockType = BlockType> {
-  id: string;
-  type: T;
-  props: BlockPropsMap[T];
-}
+export type CanvasBlock =
+  | { id: string; type: 'hero'; props: HeroProps }
+  | { id: string; type: 'features'; props: FeaturesProps }
+  | { id: string; type: 'testimonials'; props: TestimonialsProps }
+  | { id: string; type: 'pricing'; props: PricingProps }
+  | { id: string; type: 'cta'; props: CTAProps }
+  | { id: string; type: 'footer'; props: FooterProps };
 
 export type CanvasLayout = CanvasBlock[];
