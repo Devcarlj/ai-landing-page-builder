@@ -34,11 +34,12 @@ export const SortableBlock: React.FC<SortableBlockProps> = ({ block }) => {
 
   return (
     <div
+      id={`canvas-block-${block.id}`}
       ref={setNodeRef}
       style={style}
       onClick={() => selectBlock(block.id)}
       className={`relative group border-2 transition-all ${
-        isSelected ? 'border-primary shadow-lg' : 'border-transparent hover:border-muted-foreground/30'
+        isSelected ? 'border-primary shadow-lg ring-2 ring-primary/20' : 'border-transparent hover:border-muted-foreground/30'
       }`}
     >
       {/* Block Drag Handle & Remove Actions Overlay */}

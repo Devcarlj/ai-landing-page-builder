@@ -14,6 +14,7 @@ interface CanvasState {
   addBlock: (block: CanvasBlock, index?: number) => void;
   removeBlock: (id: string) => void;
   selectBlock: (id: string | null) => void;
+  focusBlock: (id: string) => void;
   
   // History Actions
   undo: () => void;
@@ -129,4 +130,12 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       future: newFuture,
     });
   },
+  
+  focusBlock: (id) => {
+    set({ selectedBlockId: id });
+    const element = document.getElementById(`canvas-block-${id}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
 }));

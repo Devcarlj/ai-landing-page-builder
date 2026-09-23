@@ -1,180 +1,197 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { CanvasLayout } from "@/shared/types";
-import { CanvasLayoutSchema } from "@/core/schemas/canvas.schema";
-import { SYSTEM_INSTRUCTION } from "./prompt.templates";
+import { DualPayloadResponse } from "@/shared/types";
+import { DualPayloadSchema } from "@/core/schemas/canvas.schema";
+import { AGENT_SYSTEM_INSTRUCTION } from "./prompt.templates";
 
-const responseSchema = {
-  type: Type.ARRAY,
-  description: "Complete landing page blocks with fully populated props",
-  items: {
-    anyOf: [
-      {
-        type: Type.OBJECT,
-        properties: {
-          id: { type: Type.STRING },
-          type: { type: Type.STRING, enum: ["hero"] },
-          props: {
-            type: Type.OBJECT,
-            properties: {
-              title: { type: Type.STRING },
-              subtitle: { type: Type.STRING },
-              ctaText: { type: Type.STRING },
-              ctaLink: { type: Type.STRING },
-            },
-            required: ["title", "subtitle", "ctaText"],
-          },
-        },
-        required: ["id", "type", "props"],
+const dualPayloadResponseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    message: {
+      type: Type.STRING,
+      description: "Conversational response explaining design choices.",
+    },
+    modifiedFiles: {
+      type: Type.ARRAY,
+      description: "List of code component file paths created or modified in this step.",
+      items: {
+        type: Type.STRING,
       },
-      {
-        type: Type.OBJECT,
-        properties: {
-          id: { type: Type.STRING },
-          type: { type: Type.STRING, enum: ["features"] },
-          props: {
+    },
+    layout: {
+      type: Type.ARRAY,
+      description: "Complete landing page blocks with fully populated props",
+      items: {
+        anyOf: [
+          {
             type: Type.OBJECT,
             properties: {
-              heading: { type: Type.STRING },
-              subheading: { type: Type.STRING },
-              items: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    title: { type: Type.STRING },
-                    description: { type: Type.STRING },
-                    iconName: { type: Type.STRING },
-                  },
-                  required: ["title", "description"],
+              id: { type: Type.STRING },
+              type: { type: Type.STRING, enum: ["hero"] },
+              props: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  subtitle: { type: Type.STRING },
+                  ctaText: { type: Type.STRING },
+                  ctaLink: { type: Type.STRING },
                 },
+                required: ["title", "subtitle", "ctaText"],
               },
             },
-            required: ["heading", "subheading", "items"],
+            required: ["id", "type", "props"],
           },
-        },
-        required: ["id", "type", "props"],
-      },
-      {
-        type: Type.OBJECT,
-        properties: {
-          id: { type: Type.STRING },
-          type: { type: Type.STRING, enum: ["testimonials"] },
-          props: {
+          {
             type: Type.OBJECT,
             properties: {
-              heading: { type: Type.STRING },
-              items: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    quote: { type: Type.STRING },
-                    author: { type: Type.STRING },
-                    role: { type: Type.STRING },
-                    avatarUrl: { type: Type.STRING },
-                  },
-                  required: ["quote", "author", "role"],
-                },
-              },
-            },
-            required: ["heading", "items"],
-          },
-        },
-        required: ["id", "type", "props"],
-      },
-      {
-        type: Type.OBJECT,
-        properties: {
-          id: { type: Type.STRING },
-          type: { type: Type.STRING, enum: ["pricing"] },
-          props: {
-            type: Type.OBJECT,
-            properties: {
-              heading: { type: Type.STRING },
-              plans: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    name: { type: Type.STRING },
-                    price: { type: Type.STRING },
-                    features: {
-                      type: Type.ARRAY,
-                      items: { type: Type.STRING },
+              id: { type: Type.STRING },
+              type: { type: Type.STRING, enum: ["features"] },
+              props: {
+                type: Type.OBJECT,
+                properties: {
+                  heading: { type: Type.STRING },
+                  subheading: { type: Type.STRING },
+                  items: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        title: { type: Type.STRING },
+                        description: { type: Type.STRING },
+                        iconName: { type: Type.STRING },
+                      },
+                      required: ["title", "description"],
                     },
-                    ctaText: { type: Type.STRING },
-                    highlighted: { type: Type.BOOLEAN },
                   },
-                  required: ["name", "price", "features", "ctaText"],
                 },
+                required: ["heading", "subheading", "items"],
               },
             },
-            required: ["heading", "plans"],
+            required: ["id", "type", "props"],
           },
-        },
-        required: ["id", "type", "props"],
-      },
-      {
-        type: Type.OBJECT,
-        properties: {
-          id: { type: Type.STRING },
-          type: { type: Type.STRING, enum: ["cta"] },
-          props: {
+          {
             type: Type.OBJECT,
             properties: {
-              title: { type: Type.STRING },
-              description: { type: Type.STRING },
-              buttonText: { type: Type.STRING },
-            },
-            required: ["title", "description", "buttonText"],
-          },
-        },
-        required: ["id", "type", "props"],
-      },
-      {
-        type: Type.OBJECT,
-        properties: {
-          id: { type: Type.STRING },
-          type: { type: Type.STRING, enum: ["footer"] },
-          props: {
-            type: Type.OBJECT,
-            properties: {
-              brandName: { type: Type.STRING },
-              copyrightText: { type: Type.STRING },
-              links: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    label: { type: Type.STRING },
-                    href: { type: Type.STRING },
+              id: { type: Type.STRING },
+              type: { type: Type.STRING, enum: ["testimonials"] },
+              props: {
+                type: Type.OBJECT,
+                properties: {
+                  heading: { type: Type.STRING },
+                  items: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        quote: { type: Type.STRING },
+                        author: { type: Type.STRING },
+                        role: { type: Type.STRING },
+                        avatarUrl: { type: Type.STRING },
+                      },
+                      required: ["quote", "author", "role"],
+                    },
                   },
-                  required: ["label", "href"],
                 },
+                required: ["heading", "items"],
               },
             },
-            required: ["brandName", "copyrightText", "links"],
+            required: ["id", "type", "props"],
           },
-        },
-        required: ["id", "type", "props"],
+          {
+            type: Type.OBJECT,
+            properties: {
+              id: { type: Type.STRING },
+              type: { type: Type.STRING, enum: ["pricing"] },
+              props: {
+                type: Type.OBJECT,
+                properties: {
+                  heading: { type: Type.STRING },
+                  plans: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        name: { type: Type.STRING },
+                        price: { type: Type.STRING },
+                        features: {
+                          type: Type.ARRAY,
+                          items: { type: Type.STRING },
+                        },
+                        ctaText: { type: Type.STRING },
+                        highlighted: { type: Type.BOOLEAN },
+                      },
+                      required: ["name", "price", "features", "ctaText"],
+                    },
+                  },
+                },
+                required: ["heading", "plans"],
+              },
+            },
+            required: ["id", "type", "props"],
+          },
+          {
+            type: Type.OBJECT,
+            properties: {
+              id: { type: Type.STRING },
+              type: { type: Type.STRING, enum: ["cta"] },
+              props: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  description: { type: Type.STRING },
+                  buttonText: { type: Type.STRING },
+                },
+                required: ["title", "description", "buttonText"],
+              },
+            },
+            required: ["id", "type", "props"],
+          },
+          {
+            type: Type.OBJECT,
+            properties: {
+              id: { type: Type.STRING },
+              type: { type: Type.STRING, enum: ["footer"] },
+              props: {
+                type: Type.OBJECT,
+                properties: {
+                  brandName: { type: Type.STRING },
+                  copyrightText: { type: Type.STRING },
+                  links: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        label: { type: Type.STRING },
+                        href: { type: Type.STRING },
+                      },
+                      required: ["label", "href"],
+                    },
+                  },
+                },
+                required: ["brandName", "copyrightText", "links"],
+              },
+            },
+            required: ["id", "type", "props"],
+          },
+        ],
       },
-    ],
+    },
   },
+  required: ["message", "modifiedFiles", "layout"],
 };
 
-export async function generateLayoutFromPrompt(
+export async function generateDualPayloadFromPrompt(
   prompt: string,
-  apiKey: string,
-): Promise<CanvasLayout> {
+  apiKey: string
+): Promise<DualPayloadResponse> {
   const ai = new GoogleGenAI({ apiKey });
 
   const response = await ai.models.generateContent({
     model: "gemini-3.5-flash-lite",
     contents: prompt,
     config: {
-      systemInstruction: SYSTEM_INSTRUCTION,
+      systemInstruction: AGENT_SYSTEM_INSTRUCTION,
       responseMimeType: "application/json",
-      responseSchema,
+      responseSchema: dualPayloadResponseSchema,
     },
   });
 
@@ -184,7 +201,7 @@ export async function generateLayoutFromPrompt(
   }
 
   const rawJson = JSON.parse(responseText);
-  const validatedLayout = CanvasLayoutSchema.parse(rawJson);
+  const validatedPayload = DualPayloadSchema.parse(rawJson);
 
-  return validatedLayout as CanvasLayout;
+  return validatedPayload as DualPayloadResponse;
 }

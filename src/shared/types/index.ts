@@ -1,10 +1,10 @@
-export type BlockType = 
-  | 'hero' 
-  | 'features' 
-  | 'testimonials' 
-  | 'pricing' 
-  | 'cta' 
-  | 'footer';
+export type BlockType =
+  | "hero"
+  | "features"
+  | "testimonials"
+  | "pricing"
+  | "cta"
+  | "footer";
 
 export interface HeroProps {
   title: string;
@@ -72,11 +72,31 @@ export type BlockPropsMap = {
 };
 
 export type CanvasBlock =
-  | { id: string; type: 'hero'; props: HeroProps }
-  | { id: string; type: 'features'; props: FeaturesProps }
-  | { id: string; type: 'testimonials'; props: TestimonialsProps }
-  | { id: string; type: 'pricing'; props: PricingProps }
-  | { id: string; type: 'cta'; props: CTAProps }
-  | { id: string; type: 'footer'; props: FooterProps };
+  | { id: string; type: "hero"; props: HeroProps }
+  | { id: string; type: "features"; props: FeaturesProps }
+  | { id: string; type: "testimonials"; props: TestimonialsProps }
+  | { id: string; type: "pricing"; props: PricingProps }
+  | { id: string; type: "cta"; props: CTAProps }
+  | { id: string; type: "footer"; props: FooterProps };
 
 export type CanvasLayout = CanvasBlock[];
+export interface ModifiedFile {
+  filePath: string;
+  blockId?: string;
+  targetSection?: BlockType;
+}
+
+export interface ChatMessage {
+  id: string;
+  sender: 'user' | 'agent';
+  text: string;
+  timestamp: string;
+  layoutApplied?: boolean;
+  modifiedFiles?: ModifiedFile[];
+}
+
+export interface DualPayloadResponse {
+  message: string;
+  modifiedFiles: ModifiedFile[];
+  layout: CanvasLayout;
+}

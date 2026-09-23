@@ -1,39 +1,37 @@
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
-import { generateLayoutFromPrompt } from '@/core/gemini/gemini.client';
-
-
-const GenerateRequestSchema = z.object({
-  prompt: z.string().min(1, 'Prompt cannot be empty'),
-  apiKey: z.string().min(1, 'API key is required'),
-});
+import { generateDualPayloadFromPrompt } from '@/core/gemini/gemini.client';
 
 export async function handleGenerateRequest(req: Request) {
   try {
-    const rawBody = await req.json();
+    const body = await req.json();
+    const { prompt, apiKey } = body;
 
-   
-    const result = GenerateRequestSchema.safeParse(rawBody);
-
-    if (!result.success) {
+    const keyToUse = apiKey || process.env.GEMINI_API_KEY;
+    if (!keyToUse) {
       return NextResponse.json(
-        { error: 'Invalid request payload', details: result.error.issues},
+        { error: 'API key missing. Please provide your Gemini API key in settings.' },
+        { status: 401 }
+      );
+    }
+
+    if (!prompt || typeof prompt !== 'string') {
+      return NextResponse.json(
+        { error: 'Prompt text is required.' },
         { status: 400 }
       );
     }
 
-    
-    const { prompt, apiKey } = result.data;
+    const payload = await generateDualPayloadFromPrompt(prompt, keyToUse);
 
-    
-    const layout = await generateLayoutFromPrompt(prompt, apiKey);
-
-    return NextResponse.json({ success: true, layout }, { status: 200 });
+    return NextResponse.json({
+      success: true,
+      message: payload.message,
+      modifiedFiles: payload.modifiedFiles,
+      layout: payload.layout,
+    });
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    return NextResponse.json(
-      { success: false, error: errorMessage },
-      { status: 500 }
-    );
+    const errorMessage = error instanceof Error ? error.message : 'Failed to generate layout.';
+    console.error('Generation Controller Error:', error);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

@@ -88,4 +88,23 @@ export const CanvasBlockSchema = z.discriminatedUnion("type", [
 
 export const CanvasLayoutSchema = z.array(CanvasBlockSchema);
 
-export type CanvasLayoutSchemaType = z.infer<typeof CanvasLayoutSchema>;
+export const ModifiedFileObjectSchema = z.object({
+  filePath: z.string(),
+  blockId: z.string().optional(),
+  targetSection: z.enum(['hero', 'features', 'testimonials', 'pricing', 'cta', 'footer']).optional(),
+});
+
+export const ModifiedFileSchema = z.preprocess((val) => {
+  if (typeof val === 'string') {
+    return { filePath: val };
+  }
+  return val;
+}, ModifiedFileObjectSchema);
+
+export const DualPayloadSchema = z.object({
+  message: z.string(),
+  modifiedFiles: z.array(ModifiedFileSchema),
+  layout: CanvasLayoutSchema,
+});
+
+export type DualPayloadType = z.infer<typeof DualPayloadSchema>;
